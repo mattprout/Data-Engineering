@@ -16,10 +16,10 @@ In this file, I will discuss the steps of the project, the design decisions I ma
 
 The following steps were taken in the project:
 
-1. First, the scope of the project was determined and the data was gathered. In this case, I chose to use the Udacity provided data set, and enriched it with one additional data source.
-2. Second, I explored and cleaned the data. The data was examined to understand the types, missing data, and ranges. Based off of the exploratory data analysis, I cleaned the data and wrote each data set to a Parquet file.  
-3. Third, I defined the data model. This model was implemented as a data warehouse.
-4. Fourth, the data warehouse was created, data was loaded from the Parquet files, and the fact and dimension tables were updated.
+1. The scope of the project was determined and the data was gathered. In this case, I chose to use the Udacity provided data set, and enriched it with one additional data source.
+2. I explored and cleaned the data. The data was examined to understand the types, missing data, and ranges. Based off of the exploratory data analysis, I cleaned the data and wrote each data set to a Parquet file.  
+3. I defined the data model. This model was implemented as a data warehouse.
+4. The data warehouse was created, data was loaded from the Parquet files, and the fact and dimension tables were updated.
 
 
 # Files
@@ -114,44 +114,44 @@ There are other techniques to keeping Redshift performant:
 
 Query:
 
-`SELECT visit_count_table.month, visitcount, monthly_average_temp
-FROM
-(
-    SELECT datetime.month, count(*) AS visitcount
-    FROM visit
-    INNER JOIN datetime on visit.arrival_date = datetime.event
-    WHERE (visit.destination_state = 'NY') AND (datetime.year = 2016)
-    GROUP BY visit.destination_state, datetime.month
-    ORDER BY datetime.month
-) visit_count_table
-INNER JOIN
-(
-    SELECT month, monthly_average_temp
-    FROM tempbystate
-    WHERE year = 2016
-    ORDER BY month
-) temp_table
-ON visit_count_table.month = temp_table.month
-ORDER BY temp_table.month;`
+SELECT visit_count_table.month, visitcount, monthly_average_temp  
+FROM  
+(  
+&nbsp;&nbsp;&nbsp;&nbsp;SELECT datetime.month, count(*) AS visitcount  
+&nbsp;&nbsp;&nbsp;&nbsp;FROM visit  
+&nbsp;&nbsp;&nbsp;&nbsp;INNER JOIN datetime on visit.arrival_date = datetime.event  
+&nbsp;&nbsp;&nbsp;&nbsp;WHERE (visit.destination_state = 'NY') AND (datetime.year = 2016)  
+&nbsp;&nbsp;&nbsp;&nbsp;GROUP BY visit.destination_state, datetime.month  
+&nbsp;&nbsp;&nbsp;&nbsp;ORDER BY datetime.month  
+) visit_count_table  
+INNER JOIN  
+(  
+&nbsp;&nbsp;&nbsp;&nbsp;SELECT month, monthly_average_temp  
+&nbsp;&nbsp;&nbsp;&nbsp;FROM tempbystate  
+&nbsp;&nbsp;&nbsp;&nbsp;WHERE year = 2016  
+&nbsp;&nbsp;&nbsp;&nbsp;ORDER BY month  
+) temp_table  
+ON visit_count_table.month = temp_table.month  
+ORDER BY temp_table.month;  
 
-2. Create a time series of international visitor counts to the US and oil prices each month in 2016.  This series can give an indication of a correlation between oil prices and tourism.
+2. Create a time series of international visitor counts to the US and oil prices each month between 2005 and 2016.  This series can give an indication of a correlation between oil prices and tourism.
 
 Query:
 
-`SELECT visit_count_table.year, visit_count_table.month, visitcount, monthly_average_price
-FROM
-(
-    SELECT year, month, count(*) AS visitcount
-    FROM visit
-    INNER JOIN datetime ON visit.arrival_date = datetime.event
-    WHERE year BETWEEN 2005 AND 2016
-    GROUP BY year, month
-) visit_count_table
-INNER JOIN
-(
-    SELECT year, month, monthly_average_price
-    FROM oilprice
-    WHERE year BETWEEN 2005 AND 2016
-) oil_price_table
-ON visit_count_table.year = oil_price_table.year AND visit_count_table.month = oil_price_table.month
-ORDER BY visit_count_table.year, visit_count_table.month;`
+SELECT visit_count_table.year, visit_count_table.month, visitcount, monthly_average_price  
+FROM  
+(  
+&nbsp;&nbsp;&nbsp;&nbsp;SELECT year, month, count(*) AS visitcount  
+&nbsp;&nbsp;&nbsp;&nbsp;FROM visit  
+&nbsp;&nbsp;&nbsp;&nbsp;INNER JOIN datetime ON visit.arrival_date = datetime.event  
+&nbsp;&nbsp;&nbsp;&nbsp;WHERE year BETWEEN 2005 AND 2016  
+&nbsp;&nbsp;&nbsp;&nbsp;GROUP BY year, month  
+) visit_count_table  
+INNER JOIN  
+(  
+&nbsp;&nbsp;&nbsp;&nbsp;SELECT year, month, monthly_average_price  
+&nbsp;&nbsp;&nbsp;&nbsp;FROM oilprice  
+&nbsp;&nbsp;&nbsp;&nbsp;WHERE year BETWEEN 2005 AND 2016  
+) oil_price_table  
+ON visit_count_table.year = oil_price_table.year AND visit_count_table.month = oil_price_table.month  
+ORDER BY visit_count_table.year, visit_count_table.month;  
